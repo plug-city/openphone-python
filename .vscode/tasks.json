@@ -1,0 +1,157 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Install Dependencies",
+			"type": "shell",
+			"command": "uv",
+			"args": [
+				"sync",
+				"--dev"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Tests",
+			"type": "shell",
+			"command": "uv",
+			"args": [
+				"run",
+				"pytest"
+			],
+			"group": "test",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Format Code",
+			"type": "shell",
+			"command": "uv",
+			"args": [
+				"run",
+				"black",
+				"src/",
+				"tests/",
+				"examples/"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Lint Code",
+			"type": "shell",
+			"command": "uv",
+			"args": [
+				"run",
+				"flake8",
+				"src/",
+				"tests/",
+				"examples/"
+			],
+			"group": "test",
+			"isBackground": false,
+			"problemMatcher": ["$python"]
+		},
+		{
+			"label": "Type Check",
+			"type": "shell",
+			"command": "uv",
+			"args": [
+				"run",
+				"mypy",
+				"src/"
+			],
+			"group": "test",
+			"isBackground": false,
+			"problemMatcher": ["$python"]
+		},
+		{
+			"label": "Run Example",
+			"type": "shell",
+			"command": "uv",
+			"args": [
+				"run",
+				"python",
+				"examples/basic_usage.py"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Build Package",
+			"type": "shell",
+			"command": "uv",
+			"args": [
+				"build"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Pre-commit",
+			"type": "shell",
+			"command": "uv",
+			"args": [
+				"run",
+				"pre-commit",
+				"run",
+				"--all-files"
+			],
+			"group": "test",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Get Version",
+			"type": "shell",
+			"command": "uv",
+			"args": [
+				"run",
+				"python",
+				"scripts/version.py",
+				"get"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Bump Patch Version",
+			"type": "shell",
+			"command": "./scripts/bump.sh",
+			"args": [
+				"patch"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Bump Minor Version",
+			"type": "shell",
+			"command": "./scripts/bump.sh",
+			"args": [
+				"minor"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Bump Major Version",
+			"type": "shell",
+			"command": "./scripts/bump.sh",
+			"args": [
+				"major"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}
