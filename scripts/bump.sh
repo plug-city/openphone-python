@@ -52,18 +52,18 @@ bump_version() {
     read -p "Commit version bump? (y/N): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
+        new_version=$(uv run python scripts/version.py get | sed 's/Current version: //')
         git add src/openphone_python/_version.py
-        git commit -m "Bump version to $(uv run python scripts/version.py)"
+        git commit -m "bump: version $new_version"
         echo -e "${GREEN}Version bump committed!${NC}"
 
         # Optionally create a tag
         read -p "Create git tag? (y/N): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            version=$(uv run python scripts/version.py)
-            git tag "v$version"
-            echo -e "${GREEN}Created tag v$version${NC}"
-            echo "Push with: git push origin v$version"
+            git tag "v$new_version"
+            echo -e "${GREEN}Created tag v$new_version${NC}"
+            echo "Push with: git push origin v$new_version"
         fi
     fi
 }
