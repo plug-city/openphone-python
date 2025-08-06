@@ -4,6 +4,7 @@ Base resource class for the OpenPhone Python SDK.
 
 from typing import Dict, Any, Optional, Iterator, TYPE_CHECKING
 import requests
+import time
 from openphone_python.exceptions import ApiError
 from openphone_python.utils.validation import validate_api_response
 from openphone_python.utils.pagination import PaginatedResult
@@ -43,16 +44,18 @@ class BaseResource:
         endpoint: str,
         params: Optional[Dict[str, Any]] = None,
         data: Optional[Dict[str, Any]] = None,
+        max_retries: int = 3,
         **kwargs,
     ) -> Dict[str, Any]:
         """
-        Make HTTP request to OpenPhone API.
+        Make HTTP request to OpenPhone API with retry logic.
 
         Args:
             method: HTTP method (GET, POST, PUT, DELETE)
             endpoint: API endpoint path
             params: Query parameters
             data: Request body data
+            max_retries: Maximum number of retry attempts
             **kwargs: Additional arguments for requests
 
         Returns:
@@ -63,15 +66,21 @@ class BaseResource:
         """
         url = f"{self.client.base_url}/{endpoint.lstrip('/')}"
 
-        try:
-            response = self.session.request(
-                method=method, url=url, params=params, json=data, **kwargs
-            )
+        for attempt in range(max_retries + 1):
+            try:
+                response = self.session.request(
+                    method=method, url=url, params=params, json=data, **kwargs
+                )
 
-            return validate_api_response(response)
+                return validate_api_response(response)
 
-        except requests.RequestException as e:
-            raise ApiError(f"Request failed: {e}", 0) from e
+            except requests.RequestException as e:
+                if attempt == max_retries:
+                    raise ApiError(f"Request failed after {max_retries} retries: {e}", 0) from e
+
+                # Exponential backoff: 1s, 2s, 4s
+                wait_time = 2 ** attempt
+                time.sleep(wait_time)
 
     def _paginate(
         self, endpoint: str, model_class: type, params: Optional[Dict[str, Any]] = None
