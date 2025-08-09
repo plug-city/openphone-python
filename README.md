@@ -147,12 +147,26 @@ call = client.calls.get("call_id")
 # List webhooks
 webhooks = client.webhooks.get_all()
 
-# Create a webhook
+# Smart webhook creation - automatically routes to correct endpoint
 webhook = client.webhooks.create({
     "url": "https://your-domain.com/webhook",
-    "events": ["message.received", "message.sent"],
+    "events": ["message.received", "message.delivered"],
     "label": "My Webhook"
+})  # Automatically uses /v1/webhooks/messages endpoint
+
+# Create call webhook - routes to /v1/webhooks/calls
+call_webhook = client.webhooks.create({
+    "url": "https://your-domain.com/webhook",
+    "events": ["call.completed", "call.ringing"],
+    "label": "Call Events"
 })
+
+# Or use specialized methods for explicit control
+message_webhook = client.webhooks.create_message_webhook(
+    url="https://your-domain.com/webhook",
+    events=["message.received"],
+    label="Message Webhook"
+)
 
 # Update a webhook
 updated_webhook = client.webhooks.update("webhook_id", {

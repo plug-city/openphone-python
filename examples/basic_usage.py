@@ -70,6 +70,63 @@ def main():
         except Exception as e:
             print(f"Error listing contacts: {e}")
 
+        # NEW: List contact custom fields
+        print("\n--- Listing Contact Custom Fields ---")
+        try:
+            custom_fields = client.contact_custom_fields.list()
+            for field in custom_fields:
+                print(f"Custom Field: {field.name} (Type: {field.field_type})")
+        except Exception as e:
+            print(f"Error listing contact custom fields: {e}")
+
+        # Example: List conversations with enhanced filtering
+        print("\n--- Listing Conversations ---")
+        try:
+            conversations = list(
+                client.conversations.list(
+                    phone_numbers=[phone_number.id], max_results=3
+                )
+            )
+            for conversation in conversations:
+                print(
+                    f"Conversation: {conversation.name or 'No name'} (ID: {conversation.id})"
+                )
+        except Exception as e:
+            print(f"Error listing conversations: {e}")
+
+        # Example: List calls
+        print(f"\n--- Recent Calls for {phone_number.number} ---")
+        try:
+            calls = list(
+                client.calls.list(
+                    phone_number_id=phone_number.id,
+                    participants=["+15555555678"],  # Replace with actual number
+                    max_results=3,
+                )
+            )
+            for call in calls:
+                print(f"Call: {call.direction} - Status: {call.status} (ID: {call.id})")
+
+                # NEW: Try to get call recording, summary, and transcript
+                try:
+                    recording = client.call_recordings.get(call.id)
+                    print(f"  Recording available: {recording.status}")
+                except NotFoundError:
+                    print("  No recording available")
+                except Exception as e:
+                    print(f"  Recording error: {e}")
+
+                try:
+                    summary = client.call_summaries.get(call.id)
+                    print(f"  Summary status: {summary.status}")
+                except NotFoundError:
+                    print("  No summary available")
+                except Exception as e:
+                    print(f"  Summary error: {e}")
+
+        except Exception as e:
+            print(f"Error listing calls: {e}")
+
         # Example: List webhooks
         print("\n--- Listing Webhooks ---")
         try:
@@ -78,6 +135,43 @@ def main():
                 print(
                     f"Webhook: {webhook.label} ({webhook.url}) - Status: {webhook.status}"
                 )
+                print(f"  Events: {', '.join(webhook.events)}")
+
+            # Example: Create different types of webhooks (commented out to avoid actual creation)
+            print("\n--- Webhook Creation Examples ---")
+
+            print("# Smart routing with generic create() method:")
+            print("# webhook = client.webhooks.create({")
+            print("#     'url': 'https://your-app.com/webhooks',")
+            print("#     'events': ['message.received', 'message.delivered'],")
+            print("#     'label': 'Auto-routed Message Webhook'")
+            print("# })  # Automatically routes to /webhooks/messages")
+            print()
+
+            print("# Or use specialized methods for more control:")
+            print("# message_webhook = client.webhooks.create_message_webhook(")
+            print("#     url='https://your-app.com/webhooks/messages',")
+            print("#     events=['message.received', 'message.delivered'],")
+            print("#     label='My Message Webhook'")
+            print("# )")
+
+            print("# call_webhook = client.webhooks.create_call_webhook(")
+            print("#     url='https://your-app.com/webhooks/calls',")
+            print("#     events=['call.completed', 'call.ringing'],")
+            print("#     label='My Call Webhook'")
+            print("# )")
+
+            print("# summary_webhook = client.webhooks.create_call_summary_webhook(")
+            print("#     url='https://your-app.com/webhooks/call-summaries',")
+            print("#     label='My Call Summary Webhook'")
+            print("# )")
+
+            print("# Create call transcript webhook:")
+            print("# transcript_webhook = client.webhooks.create_call_transcript_webhook(")
+            print("#     url='https://your-app.com/webhooks/call-transcripts',")
+            print("#     label='My Call Transcript Webhook'")
+            print("# )")
+
         except Exception as e:
             print(f"Error listing webhooks: {e}")
 

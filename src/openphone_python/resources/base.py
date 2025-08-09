@@ -76,10 +76,12 @@ class BaseResource:
 
             except requests.RequestException as e:
                 if attempt == max_retries:
-                    raise ApiError(f"Request failed after {max_retries} retries: {e}", 0) from e
+                    raise ApiError(
+                        f"Request failed after {max_retries} retries: {e}", 0
+                    ) from e
 
                 # Exponential backoff: 1s, 2s, 4s
-                wait_time = 2 ** attempt
+                wait_time = 2**attempt
                 time.sleep(wait_time)
 
     def _paginate(

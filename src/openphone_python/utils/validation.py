@@ -6,14 +6,7 @@ import re
 from typing import Union
 import phonenumbers
 import requests
-from openphone_python.exceptions import (
-    ValidationError,
-    ApiError,
-    AuthenticationError,
-    RateLimitError,
-    ServerError,
-    NotFoundError,
-)
+from openphone_python.exceptions import ValidationError
 
 
 def validate_phone_number(phone_number: str) -> str:
@@ -61,7 +54,7 @@ def validate_email(email: str) -> bool:
 
 def validate_api_response(response: requests.Response) -> dict:
     """
-    Validate API response and handle errors.
+    Validate API response and handle errors based on OpenAPI specification.
 
     Args:
         response: HTTP response object
@@ -70,34 +63,100 @@ def validate_api_response(response: requests.Response) -> dict:
         Parsed JSON response
 
     Raises:
-        Various OpenPhone exceptions based on status code
+        Various OpenPhone exceptions based on status code and error code
     """
     try:
         response_data = response.json()
     except ValueError:
         response_data = {}
 
-    if response.status_code == 401:
-        raise AuthenticationError("Invalid API key or authentication failed")
-    elif response.status_code == 403:
-        raise AuthenticationError("Access forbidden - check your permissions")
-    elif response.status_code == 404:
+    # Extract error details from response
+    error_message = response_data.get("message", f"API error: {response.status_code}")
+    error_code = response_data.get("code")
+    title = response_data.get("title")
+    docs = response_data.get("docs")
+    errors = response_data.get("errors", [])
+    trace = response_data.get("trace")
 
-        raise NotFoundError("Resource not found")
+    error_kwargs = {
+        "code": error_code,
+        "status_code": response.status_code,
+        "docs": docs,
+        "title": title,
+        "errors": errors,
+        "trace": trace,
+    }
+
+    if response.status_code == 400:
+        # Handle specific 400 error codes
+        if error_code == "0206400":
+            from openphone_python.exceptions import A2PRegistrationNotApprovedError
+
+            raise A2PRegistrationNotApprovedError(error_message, **error_kwargs)
+        elif error_code == "0101400":
+            from openphone_python.exceptions import TooManyParticipantsError
+
+            raise TooManyParticipantsError(error_message, **error_kwargs)
+        elif error_code == "0305400":
+            from openphone_python.exceptions import InvalidVersionError
+
+            raise InvalidVersionError(error_message, **error_kwargs)
+        else:
+            from openphone_python.exceptions import BadRequestError
+
+            raise BadRequestError(error_message, **error_kwargs)
+
+    elif response.status_code == 401:
+        from openphone_python.exceptions import AuthenticationError
+
+        raise AuthenticationError(error_message, **error_kwargs)
+
+    elif response.status_code == 402:
+        from openphone_python.exceptions import NotEnoughCreditsError
+
+        raise NotEnoughCreditsError(error_message, **error_kwargs)
+
+    elif response.status_code == 403:
+        # Handle specific 403 error codes
+        if error_code and "403" in error_code:
+            if "Not Phone Number User" in (title or ""):
+                from openphone_python.exceptions import NotPhoneNumberUserError
+
+                raise NotPhoneNumberUserError(error_message, **error_kwargs)
+        from openphone_python.exceptions import ForbiddenError
+
+        raise ForbiddenError(error_message, **error_kwargs)
+
+    elif response.status_code == 404:
+        from openphone_python.exceptions import NotFoundError
+
+        raise NotFoundError(error_message, **error_kwargs)
+
+    elif response.status_code == 409:
+        from openphone_python.exceptions import ConflictError
+
+        raise ConflictError(error_message, **error_kwargs)
+
     elif response.status_code == 429:
         retry_after = response.headers.get("Retry-After")
         retry_after_int = (
             int(retry_after) if retry_after and retry_after.isdigit() else None
         )
-        raise RateLimitError("Rate limit exceeded", retry_after=retry_after_int)
-    elif response.status_code >= 500:
+        from openphone_python.exceptions import RateLimitError
 
-        raise ServerError(f"Server error: {response.status_code}")
+        raise RateLimitError(error_message, retry_after=retry_after_int, **error_kwargs)
+
+    elif response.status_code >= 500:
+        from openphone_python.exceptions import ServerError
+
+        raise ServerError(error_message, **error_kwargs)
+
     elif response.status_code >= 400:
-        error_message = response_data.get("error", {}).get(
-            "message", f"API error: {response.status_code}"
+        from openphone_python.exceptions import ApiError
+
+        raise ApiError(
+            error_message, response.status_code, response_data, **error_kwargs
         )
-        raise ApiError(error_message, response.status_code, response_data)
 
     return response_data
 

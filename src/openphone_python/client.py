@@ -6,8 +6,12 @@ from typing import Optional
 from openphone_python.auth.api_key import ApiKeyAuth
 from openphone_python.resources.messages import MessagesResource
 from openphone_python.resources.contacts import ContactsResource
+from openphone_python.resources.contact_custom_fields import ContactCustomFieldsResource
 from openphone_python.resources.phone_numbers import PhoneNumbersResource
 from openphone_python.resources.calls import CallsResource
+from openphone_python.resources.call_recordings import CallRecordingsResource
+from openphone_python.resources.call_summaries import CallSummariesResource
+from openphone_python.resources.call_transcripts import CallTranscriptsResource
 from openphone_python.resources.webhooks import WebhooksResource
 from openphone_python.resources.conversations import ConversationsResource
 
@@ -37,8 +41,12 @@ class OpenPhoneClient:
         # Lazy-loaded resources
         self._messages: Optional[MessagesResource] = None
         self._contacts: Optional[ContactsResource] = None
+        self._contact_custom_fields: Optional[ContactCustomFieldsResource] = None
         self._phone_numbers: Optional[PhoneNumbersResource] = None
         self._calls: Optional[CallsResource] = None
+        self._call_recordings: Optional[CallRecordingsResource] = None
+        self._call_summaries: Optional[CallSummariesResource] = None
+        self._call_transcripts: Optional[CallTranscriptsResource] = None
         self._webhooks: Optional[WebhooksResource] = None
         self._conversations: Optional[ConversationsResource] = None
 
@@ -57,6 +65,13 @@ class OpenPhoneClient:
         return self._contacts
 
     @property
+    def contact_custom_fields(self) -> ContactCustomFieldsResource:
+        """Get contact custom fields resource."""
+        if self._contact_custom_fields is None:
+            self._contact_custom_fields = ContactCustomFieldsResource(self)
+        return self._contact_custom_fields
+
+    @property
     def phone_numbers(self) -> PhoneNumbersResource:
         """Get phone numbers resource."""
         if self._phone_numbers is None:
@@ -69,6 +84,27 @@ class OpenPhoneClient:
         if self._calls is None:
             self._calls = CallsResource(self)
         return self._calls
+
+    @property
+    def call_recordings(self) -> CallRecordingsResource:
+        """Get call recordings resource."""
+        if self._call_recordings is None:
+            self._call_recordings = CallRecordingsResource(self)
+        return self._call_recordings
+
+    @property
+    def call_summaries(self) -> CallSummariesResource:
+        """Get call summaries resource."""
+        if self._call_summaries is None:
+            self._call_summaries = CallSummariesResource(self)
+        return self._call_summaries
+
+    @property
+    def call_transcripts(self) -> CallTranscriptsResource:
+        """Get call transcripts resource."""
+        if self._call_transcripts is None:
+            self._call_transcripts = CallTranscriptsResource(self)
+        return self._call_transcripts
 
     @property
     def webhooks(self) -> WebhooksResource:

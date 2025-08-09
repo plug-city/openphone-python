@@ -13,6 +13,15 @@ from .exceptions import (
     ValidationError,
     NotFoundError,
     ApiError,
+    BadRequestError,
+    ForbiddenError,
+    ConflictError,
+    ServerError,
+    NotEnoughCreditsError,
+    A2PRegistrationNotApprovedError,
+    TooManyParticipantsError,
+    NotPhoneNumberUserError,
+    InvalidVersionError,
 )
 
 __all__ = [
@@ -23,6 +32,15 @@ __all__ = [
     "ValidationError",
     "NotFoundError",
     "ApiError",
+    "BadRequestError",
+    "ForbiddenError",
+    "ConflictError",
+    "ServerError",
+    "NotEnoughCreditsError",
+    "A2PRegistrationNotApprovedError",
+    "TooManyParticipantsError",
+    "NotPhoneNumberUserError",
+    "InvalidVersionError",
     "__version__",
 ]
 
