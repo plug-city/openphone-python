@@ -5,6 +5,7 @@ Base resource class for the OpenPhone Python SDK.
 from typing import Dict, Any, Optional, Iterator, TYPE_CHECKING
 import requests
 import time
+import logging
 from openphone_python.exceptions import ApiError
 from openphone_python.utils.validation import validate_api_response
 from openphone_python.utils.pagination import PaginatedResult
@@ -12,6 +13,8 @@ from openphone_python.utils.pagination import PaginatedResult
 if TYPE_CHECKING:
     from openphone_python.client import OpenPhoneClient
     from openphone_python.models.base import BaseModel
+
+logger = logging.getLogger(__name__)
 
 
 class BaseResource:
@@ -66,16 +69,30 @@ class BaseResource:
         """
         url = f"{self.client.base_url}/{endpoint.lstrip('/')}"
 
+        # Log the outgoing request (single concise log)
+        logger.debug("OpenPhone API Request: %s %s | Params: %s | Data: %s",
+                    method, url, params, data)
+
         for attempt in range(max_retries + 1):
             try:
                 response = self.session.request(
                     method=method, url=url, params=params, json=data, **kwargs
                 )
 
-                return validate_api_response(response)
+                # Log the response (single concise log)
+                content_preview = response.text[:500] + "..." if len(response.text) > 500 else response.text
+                logger.debug("OpenPhone API Response: %s | Headers: %s | Content: %s",
+                           response.status_code, dict(response.headers), content_preview)
+
+                validated_response = validate_api_response(response)
+                return validated_response
 
             except requests.RequestException as e:
+                logger.warning("Request attempt %d/%d failed: %s",
+                             attempt + 1, max_retries + 1, e)
+
                 if attempt == max_retries:
+                    logger.error("All %d request attempts failed: %s", max_retries + 1, e)
                     raise ApiError(
                         f"Request failed after {max_retries} retries: {e}", 0
                     ) from e
@@ -83,6 +100,9 @@ class BaseResource:
                 # Exponential backoff: 1s, 2s, 4s
                 wait_time = 2**attempt
                 time.sleep(wait_time)
+            except Exception as e:
+                logger.error("Unexpected error during request: %s", e, exc_info=True)
+                raise
 
     def _paginate(
         self, endpoint: str, model_class: type, params: Optional[Dict[str, Any]] = None
