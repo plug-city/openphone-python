@@ -26,6 +26,34 @@ class OpenPhoneError(Exception):
         self.errors = errors or []
         self.trace = trace
 
+    @property
+    def details(self) -> str:
+        """Return a detailed string representation of the error."""
+        base_message = super().__str__()
+
+        # Collect error details
+        details = []
+        if self.status_code:
+            details.append(f"status_code={self.status_code}")
+        if self.code:
+            details.append(f"code={self.code}")
+        if self.title:
+            details.append(f"title='{self.title}'")
+        if self.errors:
+            details.append(f"errors={self.errors}")
+        if self.docs:
+            details.append(f"docs='{self.docs}'")
+        if self.trace:
+            details.append(f"trace='{self.trace}'")
+
+        if details:
+            return f"{base_message} [{', '.join(details)}]"
+        return base_message
+
+    def __repr__(self) -> str:
+        """Return a detailed representation for debugging."""
+        return f"{self.__class__.__name__}({self.__str__()})"
+
 
 class AuthenticationError(OpenPhoneError):
     """Raised when authentication fails (401)."""
