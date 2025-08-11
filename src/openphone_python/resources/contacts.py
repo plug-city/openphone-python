@@ -72,7 +72,7 @@ class ContactsResource(BaseResource):
             Contact instance
         """
         response = self._post("contacts", contact_data)
-        return Contact(response)
+        return Contact(response.get("data", response))
 
     def get(self, contact_id: str) -> Contact:
         """
@@ -85,7 +85,7 @@ class ContactsResource(BaseResource):
             Contact instance
         """
         response = self._get(f"contacts/{contact_id}")
-        return Contact(response)
+        return Contact(response.get("data", response))
 
     def update(self, contact_id: str, contact_data: Dict[str, Any]) -> Contact:
         """
@@ -99,7 +99,7 @@ class ContactsResource(BaseResource):
             Updated Contact instance
         """
         response = self._patch(f"contacts/{contact_id}", contact_data)
-        return Contact(response)
+        return Contact(response.get("data", response))
 
     def delete(self, contact_id: str) -> bool:
         """

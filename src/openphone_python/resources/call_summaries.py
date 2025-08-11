@@ -31,4 +31,4 @@ class CallSummariesResource(BaseResource):
             ForbiddenError: If access to the summary is forbidden
         """
         response = self._get(f"call-summaries/{call_id}")
-        return CallSummary(response)
+        return CallSummary(response.get("data", response))

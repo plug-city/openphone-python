@@ -107,7 +107,7 @@ class WebhooksResource(BaseResource):
             Webhook instance
         """
         response = self._post(endpoint, webhook_data)
-        return Webhook(response)
+        return Webhook(response.get("data", response))
 
     def create_message_webhook(
         self,
@@ -152,7 +152,7 @@ class WebhooksResource(BaseResource):
             webhook_data["userId"] = user_id
 
         response = self._post("webhooks/messages", webhook_data)
-        return Webhook(response)
+        return Webhook(response.get("data", response))
 
     def create_call_webhook(
         self,
@@ -197,7 +197,7 @@ class WebhooksResource(BaseResource):
             webhook_data["userId"] = user_id
 
         response = self._post("webhooks/calls", webhook_data)
-        return Webhook(response)
+        return Webhook(response.get("data", response))
 
     def create_call_summary_webhook(
         self,
@@ -234,7 +234,7 @@ class WebhooksResource(BaseResource):
             webhook_data["userId"] = user_id
 
         response = self._post("webhooks/call-summaries", webhook_data)
-        return Webhook(response)
+        return Webhook(response.get("data", response))
 
     def create_call_transcript_webhook(
         self,
@@ -271,7 +271,7 @@ class WebhooksResource(BaseResource):
             webhook_data["userId"] = user_id
 
         response = self._post("webhooks/call-transcripts", webhook_data)
-        return Webhook(response)
+        return Webhook(response.get("data", response))
 
     def get(self, webhook_id: str) -> Webhook:
         """
@@ -284,21 +284,21 @@ class WebhooksResource(BaseResource):
             Webhook instance
         """
         response = self._get(f"webhooks/{webhook_id}")
-        return Webhook(response)
+        return Webhook(response.get("data", response))
 
-    def update(self, webhook_id: str, webhook_data: Dict[str, Any]) -> Webhook:
-        """
-        Update an existing webhook.
+    # def update(self, webhook_id: str, webhook_data: Dict[str, Any]) -> Webhook:
+    #     """
+    #     Update an existing webhook.
 
-        Args:
-            webhook_id: Webhook ID
-            webhook_data: Updated webhook configuration
+    #     Args:
+    #         webhook_id: Webhook ID
+    #         webhook_data: Updated webhook configuration
 
-        Returns:
-            Updated Webhook instance
-        """
-        response = self._put(f"webhooks/{webhook_id}", webhook_data)
-        return Webhook(response)
+    #     Returns:
+    #         Updated Webhook instance
+    #     """
+    #     response = self._put(f"webhooks/{webhook_id}", webhook_data)
+    #     return Webhook(response)
 
     def delete(self, webhook_id: str) -> bool:
         """

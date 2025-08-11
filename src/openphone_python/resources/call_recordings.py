@@ -30,4 +30,4 @@ class CallRecordingsResource(BaseResource):
             ForbiddenError: If access to the recording is forbidden
         """
         response = self._get(f"call-recordings/{call_id}")
-        return CallRecording(response)
+        return CallRecording(response.get("data", response))

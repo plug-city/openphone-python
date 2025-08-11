@@ -107,7 +107,7 @@ class MessagesResource(BaseResource):
             data["userId"] = user_id
 
         response = self._post("messages", data)
-        return Message(response)
+        return Message(response.get("data", response))
 
     def get(self, message_id: str) -> Message:
         """
@@ -120,4 +120,4 @@ class MessagesResource(BaseResource):
             Message instance
         """
         response = self._get(f"messages/{message_id}")
-        return Message(response)
+        return Message(response.get("data", response))

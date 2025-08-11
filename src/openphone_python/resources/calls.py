@@ -88,4 +88,4 @@ class CallsResource(BaseResource):
             Call instance
         """
         response = self._get(f"calls/{call_id}")
-        return Call(response)
+        return Call(response.get("data", response))

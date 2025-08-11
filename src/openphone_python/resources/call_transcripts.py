@@ -31,4 +31,4 @@ class CallTranscriptsResource(BaseResource):
             ForbiddenError: If access to the transcript is forbidden
         """
         response = self._get(f"call-transcripts/{transcript_id}")
-        return CallTranscript(response)
+        return CallTranscript(response.get("data", response))
