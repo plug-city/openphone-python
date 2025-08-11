@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "plug-city", email = "30635146+plug-city@users.noreply.github.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "requests>=2.25.0",
     "phonenumbers>=8.12.0",
