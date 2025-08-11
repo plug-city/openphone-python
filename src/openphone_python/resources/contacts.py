@@ -98,7 +98,7 @@ class ContactsResource(BaseResource):
         Returns:
             Updated Contact instance
         """
-        response = self._put(f"contacts/{contact_id}", contact_data)
+        response = self._patch(f"contacts/{contact_id}", contact_data)
         return Contact(response)
 
     def delete(self, contact_id: str) -> bool:
