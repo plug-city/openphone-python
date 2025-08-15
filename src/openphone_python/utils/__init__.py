@@ -16,6 +16,10 @@ from .formatting import (
     extract_country_code,
     is_valid_phone_number,
 )
+from .raw_request import (
+    raw_request,
+    raw_request_with_response_object,
+)
 
 __all__ = [
     "validate_phone_number",
@@ -28,4 +32,6 @@ __all__ = [
     "format_phone_numbers_list",
     "extract_country_code",
     "is_valid_phone_number",
+    "raw_request",
+    "raw_request_with_response_object",
 ]

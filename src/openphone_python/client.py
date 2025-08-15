@@ -2,8 +2,10 @@
 Main client class for the OpenPhone Python SDK.
 """
 
-from typing import Optional
+from typing import Optional, Dict, Any
+import requests
 from openphone_python.auth.api_key import ApiKeyAuth
+from openphone_python.utils.raw_request import raw_request, raw_request_with_response_object
 from openphone_python.resources.messages import MessagesResource
 from openphone_python.resources.contacts import ContactsResource
 from openphone_python.resources.contact_custom_fields import ContactCustomFieldsResource
@@ -123,3 +125,98 @@ class OpenPhoneClient:
     def __repr__(self) -> str:
         """String representation of client."""
         return f"OpenPhoneClient(base_url='{self.base_url}')"
+
+    def raw_request(
+        self,
+        endpoint: str,
+        method: str = "GET",
+        params: Optional[Dict[str, Any]] = None,
+        data: Optional[Dict[str, Any]] = None,
+        timeout: int = 30
+    ) -> Dict[str, Any]:
+        """
+        Make a raw API request using the client's authentication.
+
+        This method provides direct access to the OpenPhone API without
+        any SDK model processing. Useful for endpoints not yet supported
+        by the SDK or when you need the raw response data.
+
+        Args:
+            endpoint: API endpoint (e.g., "contacts", "messages", "calls/{id}")
+            method: HTTP method (GET, POST, PUT, PATCH, DELETE)
+            params: Query parameters as dictionary
+            data: Request body data as dictionary (for POST/PUT/PATCH)
+            timeout: Request timeout in seconds (default: 30)
+
+        Returns:
+            Parsed JSON response as dictionary
+
+        Raises:
+            requests.RequestException: On network errors
+
+        Examples:
+            # List contacts
+            response = client.raw_request("contacts", params={"maxResults": 10})
+
+            # Get single contact
+            response = client.raw_request("contacts/CNT123")
+
+            # Create contact
+            contact_data = {"defaultFields": {"firstName": "John"}}
+            response = client.raw_request("contacts", "POST", data=contact_data)
+
+            # Update contact
+            update_data = {"defaultFields": {"firstName": "Jane"}}
+            response = client.raw_request("contacts/CNT123", "PATCH", data=update_data)
+        """
+        return raw_request(
+            api_key=self.auth.api_key,
+            endpoint=endpoint,
+            method=method,
+            params=params,
+            data=data,
+            base_url=self.base_url,
+            timeout=timeout
+        )
+
+    def raw_request_with_response_object(
+        self,
+        endpoint: str,
+        method: str = "GET",
+        params: Optional[Dict[str, Any]] = None,
+        data: Optional[Dict[str, Any]] = None,
+        timeout: int = 30
+    ) -> requests.Response:
+        """
+        Make a raw API request and return the full Response object.
+
+        Alternative to raw_request() that returns the full requests.Response
+        object instead of parsed JSON. Useful when you need access to headers,
+        status codes, or want to handle parsing yourself.
+
+        Args:
+            endpoint: API endpoint (e.g., "contacts", "messages", "calls/{id}")
+            method: HTTP method (GET, POST, PUT, PATCH, DELETE)
+            params: Query parameters as dictionary
+            data: Request body data as dictionary (for POST/PUT/PATCH)
+            timeout: Request timeout in seconds (default: 30)
+
+        Returns:
+            Full requests.Response object
+
+        Examples:
+            # Get response object
+            response = client.raw_request_with_response_object("contacts")
+            print(response.status_code)
+            print(response.headers)
+            print(response.json())  # Parse yourself
+        """
+        return raw_request_with_response_object(
+            api_key=self.auth.api_key,
+            endpoint=endpoint,
+            method=method,
+            params=params,
+            data=data,
+            base_url=self.base_url,
+            timeout=timeout
+        )

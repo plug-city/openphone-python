@@ -177,6 +177,88 @@ updated_webhook = client.webhooks.update("webhook_id", {
 client.webhooks.delete("webhook_id")
 ```
 
+## Raw API Requests
+
+If you need direct access to the OpenPhone API without the SDK's model parsing, you have two options:
+
+### Option 1: Client Methods (Recommended)
+
+Use the client's built-in raw request methods for cleaner syntax:
+
+```python
+from openphone_python import OpenPhoneClient
+
+client = OpenPhoneClient(api_key="your_api_key")
+
+# Simple raw request - returns parsed JSON
+response = client.raw_request(
+    endpoint="contacts",
+    params={"maxResults": 10}
+)
+print(response)  # Dict containing the raw API response
+
+# Raw request with full response object access
+response = client.raw_request_with_response_object(
+    endpoint="messages",
+    method="POST",
+    data={"content": "Hello!", "toNumbers": ["+15555555678"]}
+)
+print(response.status_code)  # 200
+print(response.headers)      # Response headers
+print(response.json())       # Parse JSON yourself
+```
+
+### Option 2: Standalone Utilities
+
+Use the standalone utility functions when you don't have a client instance:
+
+```python
+from openphone_python.utils import raw_request, raw_request_with_response_object
+
+# Simple raw request - returns parsed JSON
+response = raw_request(
+    api_key="your_api_key",
+    endpoint="contacts",
+    params={"maxResults": 10}
+)
+print(response)  # Dict containing the raw API response
+
+# Raw request with full response object access
+response = raw_request_with_response_object(
+    api_key="your_api_key",
+    endpoint="messages",
+    method="POST",
+    data={"content": "Hello!", "toNumbers": ["+15555555678"]}
+)
+print(response.status_code)  # 200
+print(response.headers)      # Response headers
+print(response.json())       # Parse JSON yourself
+```
+
+### Mixed Usage Pattern
+
+Combine regular SDK usage with raw requests for maximum flexibility:
+
+```python
+client = OpenPhoneClient(api_key="your_api_key")
+
+# Use SDK models for common operations
+contacts = client.contacts.list(max_results=10)
+for contact in contacts:
+    print(f"Contact: {contact.first_name} {contact.last_name}")
+
+# Use raw requests for special cases or unsupported endpoints
+custom_data = client.raw_request("custom-endpoint", params={"special": "param"})
+experimental_response = client.raw_request("beta/new-feature")
+```
+
+**Use cases for raw requests:**
+- When you need access to response headers or status codes
+- For endpoints not yet supported by the SDK
+- When you want to handle JSON parsing yourself
+- For debugging API responses
+- Testing new or experimental API features
+
 ## Error Handling
 
 The SDK provides specific exception types for different error conditions:
